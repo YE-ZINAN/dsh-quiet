@@ -69,6 +69,69 @@ L2 为什么不可配：仅仅**收到**一条通知、不需要回应，就足�
 
 注意一个反直觉但正常的点：**你人正在 DSH 窗口里的时候，闪烁看不出效果**——因为那个任务栏按钮本来就亮着。闪烁只在 DSH 不在前台时才有意义，而那时候正是你走开了。两个区间不重叠，所以这里不需要额外补偿。
 
+## 为什么这样设计
+
+下面每一条都不是"感觉应该这样"，而是有研究支持、或者有明确的推论链。
+
+### 等待 AI 为什么让人焦虑
+
+这不是一个毛病，是三个独立机制叠出来的：
+
+| 机制 | 研究 | 在你身上的表现 |
+|---|---|---|
+| **不确定性本身就是致焦虑源**，跟结果好坏无关 | Grupe & Nitschke (2013)：对不确定性的持续预期直接驱动焦虑；人宁愿要一个确定的坏结果，也不要不确定 | "它还要多久？是不是卡住了？是不是在等我？"——于是反复回去看 |
+| **没做完的事会一直占着脑子** | Zeigarnik 效应；Masicampo & Baumeister (2011)：未完成目标会损害后续任务的表现；Leroy (2009)：任务切换会留下"注意力残留" | 你切去干别的，却干不进去——那个跑着的任务一直占着内存 |
+| **等待的主观时长被放大** | Maister (1984) 等待心理原则：无所事事的等待 > 有事可干的等待；焦虑使等待更长；**不确定的等待 > 已知有限的等待** | 实际等了 3 分钟，感觉像 15 分钟，于是更焦虑、更盯 |
+
+另外，被打断的工作虽然做得更快，但压力、挫败感、时间压力和努力程度都更高（Mark, Gudith & Klocke, CHI '08）。所以"我再瞄一眼"不是免费的。
+
+**关键推论**：这三条没有一条是"AI 太慢"造成的，全部是"**你不知道什么时候该回来**"造成的。
+
+所以让 AI 更快治不了这个病——再快也还是有等待，不确定性一点没减。真正能治的是把**监控责任从人转移到系统**。
+
+而这件事有个前提：**信任**。系统只要漏叫一次，你就会退回盯屏幕，前面全白做。所以这个插件的第一条规矩不是"少打扰"，而是「**宁可多闪一次，不可漏闪一次**」。
+
+### 由此定下的规矩
+
+| 规矩 | 依据 | 具体做法 |
+|---|---|---|
+| **提醒必须极度吝啬** | Stothart, Mitchum & Yehnert (2015)：仅仅**收到**一条通知、不需要回应，就足以损害注意力任务的表现，程度与主动用手机相当。Kushlev, Proulx & Dunn (2016)：通知增加注意力涣散 | 只在此人不在就**真的进行不下去**、或整件事有了终态时才提醒 |
+| **批量优于实时** | Fitz, Kushlev, … & Ariely (2019)：把通知批处理到每天 3 次，改善了注意力、降低了压力与负性情绪 | 专注块：非阻塞事件一律攒着，结束时一起给 |
+| **不给"预计剩余时间"** | 推论。Maister 说"已知有限"的等待更好受，产品直觉于是是给进度条——但 agent 的剩余时间本质不可预测，**给错比不给更伤信任** | 不显示倒计时。改为给有限性承诺：不是"还要 3 分钟"，而是"**你不需要等**" |
+| **专注开始时给一句托管声明** | Masicampo & Baumeister (2011)：为未完成的目标**制定一个具体计划**，就能消除它带来的侵入性思维 | 那句"接下来 25 分钟我不管它"就是那个计划，不是仪式感 |
+| **不产生未读计数、不产生待清空的列表** | 反身性推论：一个带角标的面板 = 一个新的未完成任务 = 又一条 Zeigarnik | 提醒是瞬时的，闪完即止；没有"未读 3 条"这种东西 |
+| **回来时给结论，不给状态列表** | Leroy (2009)：没有闭合感的任务切换会持续污染下一件事 | `/focus off` 给的是"攒下了这些事"，不是一堆日志 |
+
+更完整的设计推导与源码取证记录见 `DESIGN.md`。
+
+### 文献
+
+**注意力与打断**
+
+- Mark, G., Gudith, D., & Klocke, U. (2008). *The cost of interrupted work: More speed and stress.* CHI '08. https://dl.acm.org/doi/10.1145/1357054.1357072
+- Stothart, C., Mitchum, A., & Yehnert, C. (2015). *The attentional cost of receiving a cell phone notification.* JEP:HPP, 41(4), 893–897. https://pubmed.ncbi.nlm.nih.gov/26121498/
+- Kushlev, K., Proulx, J., & Dunn, E. W. (2016). *"Silence Your Phones": Smartphone notifications increase inattention and hyperactivity symptoms.* CHI '16. https://dl.acm.org/doi/abs/10.1145/2858036.2858359
+- Fitz, N., Kushlev, K., Jagannathan, R., Lewis, T., Paliwal, D., & Ariely, D. (2019). *Batching smartphone notifications can improve well-being.* Computers in Human Behavior. https://www.sciencedirect.com/science/article/abs/pii/S0747563219302596
+
+**未完成目标、侵入性思维、注意力残留**
+
+- Masicampo, E. J., & Baumeister, R. F. (2011). *Consider it done! Plan making can eliminate the cognitive effects of unfulfilled goals.* JPSP. https://pubmed.ncbi.nlm.nih.gov/21688924/
+- Leroy, S. (2009). *Why is it so hard to do my work? The challenge of attention residue when switching between work tasks.* OBHDP. https://www.sciencedirect.com/science/article/abs/pii/S0749597809000399
+
+**不确定性与焦虑**
+
+- Grupe, D. W., & Nitschke, J. B. (2013). *Uncertainty and anticipation in anxiety: An integrated neurobiological and psychological perspective.* Nature Reviews Neuroscience. https://pubmed.ncbi.nlm.nih.gov/23783199/
+
+**等待心理学**
+
+- Maister, D. (1984) 等待心理原则（后由 Davis & Heineke 1994、Jones & Peppiatt 1996 各补一条）。中文转录：https://xlzx.whu.edu.cn/info/1024/1589.htm
+
+**AI 交互体验**
+
+- Guo, Y. et al. (2025/2026). *QoNext: Towards Next-generation QoE for Foundation Models.* arXiv:2509.21889. https://arxiv.org/abs/2509.21889
+
+> 以上每条都回过原始文献。规划期间搜到过一条"用户对 AI 延迟要么干等、要么切去做别的"、看起来极贴题的结论，追到源头发现是一篇代码渲染的眼动研究——搜索引擎拼接错了。所以这里的断言不敢凭印象写，出处也都留了链接，你可以自己核。
+
 ## 配置
 
 改 `cordis.patch.yml` 里的 `config`：
