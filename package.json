@@ -1,6 +1,6 @@
 {
   "name": "dsh-quiet",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "只在 agent 被卡住、或整件事有了终态时提醒你，其余时间完全安静。DeepSeek Harness 桌面端插件。",
   "type": "module",
   "license": "MIT",
