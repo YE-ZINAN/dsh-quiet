@@ -1,0 +1,46 @@
+- insert:
+    - id: dsh-quiet
+      name: 'dsh-quiet'
+      config:
+        # ── 诊断键 ──────────────────────────────────────────────
+        # 之前无法判断这个 patch 文件到底有没有被读取：它的值与 index.js 里的
+        # 默认值完全一致，激活日志里看不出来。加一个只有 patch 才有的键，
+        # 激活日志里出现它就说明 patch 生效。确认后可删。
+        _patchProbe: 'cordis.patch.yml-loaded'
+
+        # P1 已验收（2026-10-04）。证据：激活记录里 plugin-ctx 首次到货
+        # (duplicate:false)，root-ctx 全部 duplicate:true（冗余），
+        # 且 approval/asked 被正确判成 L0、alerting:true。
+        # 于是打开提醒、关掉高频调试记录。
+        flash: true
+        channel: windows-taskbar
+
+        # 事件分级：允许提醒的级别。
+        # L2（中间进展：一次回复结束、工具完成）刻意不给开关。
+        # 依据 Stothart et al. (2015)：仅仅收到一条通知就足以损害注意力表现，
+        # 而 L2 不阻塞任何事 —— 提醒收益为零，成本是一次实打实的打断。
+        alertLevels:
+          - L0
+          - L1
+
+        # 提醒形态：只闪任务栏（用户 2026-10-03 的决定），且不抢焦点。
+        # 如果发现 25 分钟的专注块里漏看了提醒，把 l0FlashMode 改成 all
+        # （任务栏+标题栏一起闪，更显眼，仍然不抢焦点）。
+        l0FlashMode: tray
+        l0FlashCount: 15
+        l0UntilFocused: false
+        l1FlashMode: tray
+        l1FlashCount: 8
+
+        # 专注块默认时长（分钟）。按番茄钟取 25；/focus <分钟> 可随时覆盖。
+        focusMinutes: 25
+        # 专注块内 L0 是否穿透。默认穿透（用户 2026-10-03 的决定）：
+        # 审批是 fail-closed，你不在它就一直停着 —— 不穿透的代价不是"晚点知道"
+        # 而是"任务停摆"。
+        focusL0Penetrates: true
+
+        # 调试记录：默认关。开着会为每条会话事件写两行（含 root-ctx 那条重复的）。
+        debugAllEvents: false
+
+        # 观测日志（JSONL）。留空则写到插件目录下的 events.jsonl。
+        logPath: ''

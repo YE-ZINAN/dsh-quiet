@@ -1,0 +1,12 @@
+# 运行时产物，不进仓库
+events.jsonl
+focus.json
+
+# 依赖与编辑器
+node_modules/
+.vscode/
+.idea/
+
+# 系统
+Thumbs.db
+desktop.ini
