@@ -677,6 +677,41 @@ aborted + user   → L2（你自己按停的，你知道）
 
 **未做**：P5 度量埋点（n-of-1 方案里的指标采集）。
 
+---
+
+# 第四轮（2026-10-04）：公开发布
+
+## 三十一、发布记录
+
+- 仓库：https://github.com/YE-ZINAN/dsh-quiet —— **public**，2026-10-04 创建
+- 首个 release：**v1.0.0**，附 `dsh-quiet-1.0.0.zip`（45.9 KB，11 个文件）
+- 本地与远端 `main` 一致：`bd682a8`
+
+### 公开前的清理（这条流程值得复用）
+
+| 项 | 处置 |
+|---|---|
+| 绝对路径 | `<DSH 安装目录>`、`<DSH_HOME>` 占位符替换 |
+| `tools/self-check.mjs` 里写死的 yaml 路径 | 改成从 `DSH_HOME`（或 `~/.dsh`）推导各 profile 的 `node_modules`，再退回常规模块解析 —— **不写死别人机器上不存在的路径** |
+| LICENSE | MIT，`Copyright (c) 2026 YE-ZINAN`（沿用你另外两个仓库的惯例） |
+| `.gitattributes` | **`*.ps1 text eol=crlf`** —— 防止 git 在 checkout 时把 CRLF 规范化成 LF，那会重新触发第十一节第 1 条那个编码坑 |
+| `.gitignore` | 运行时产物 `events.jsonl` / `focus.json` 不进仓库 |
+| `package.json` | 去掉 `private`，补 `license` / `repository` / `keywords`，版本 `1.0.0` |
+
+发布前扫描过所有文件确认无本地路径、无个人标识。
+
+### 发布动作的经验（本机特有，下次直接照做）
+
+1. **本机没装 `gh`。** 建仓库和发 release 走 GitHub REST API。
+   token 用 `git credential fill` 从 Windows 凭据管理器取（PAT，长度 40），**只在进程内使用，不打印、不落盘**。
+2. **受限沙箱下 git 的凭据助手起不来**：
+   `sh.exe: *** fatal error - couldn't create signal pipe, Win32 error 5`
+   —— 受限模式禁命名管道。**凡涉及推送/取凭据的操作都要 `danger-full-access`。**
+3. **推送如预期是间歇性的**：第 1 次 `Failed to connect to github.com port 443 after 21153 ms`，
+   等 10 秒后第 2 次成功。重试循环是必需的，不是保险。
+4. 压缩包里的 `.ps1` 复核过：BOM 在、零裸 LF。`Compress-Archive` 是字节复制，不会破坏编码。
+
+
 
 
 
