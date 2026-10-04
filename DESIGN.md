@@ -710,6 +710,20 @@ aborted + user   → L2（你自己按停的，你知道）
 3. **推送如预期是间歇性的**：第 1 次 `Failed to connect to github.com port 443 after 21153 ms`，
    等 10 秒后第 2 次成功。重试循环是必需的，不是保险。
 4. 压缩包里的 `.ps1` 复核过：BOM 在、零裸 LF。`Compress-Archive` 是字节复制，不会破坏编码。
+5. **PowerShell 5.1 的 `Invoke-RestMethod` 不带 charset 时按 Latin-1 编码 body** —— 中文全变成 `?`。
+   建仓库时我用的是 `-ContentType 'application/json'`（漏了 charset），于是仓库描述被存坏成
+   `? agent ?????????…`；发 release 时带了 `charset=utf-8`，所以正文完好。
+   修法是把 **UTF-8 字节直接当 body 发**：
+
+   ```powershell
+   $bytes = [System.Text.Encoding]::UTF8.GetBytes(($payload | ConvertTo-Json))
+   Invoke-RestMethod -Body $bytes -ContentType 'application/json; charset=utf-8' …
+   ```
+
+   **核验教训（比坑本身重要）**：控制台里的乱码**分不清**是"终端显示问题"还是"数据真的坏了"。
+   这台机器上我已经被 `Get-Content` 的 GBK 显示骗过一次（第二十三节第 5 条）。
+   所以判断编码问题**不能靠肉眼看输出**，要比对字符码点或直接判等：
+   `'{0:X4}' -f [int]$s[0]` —— 期望 `8BA9`（让），实际拿到 `003F`（`?`）就说明真坏了。
 
 
 
